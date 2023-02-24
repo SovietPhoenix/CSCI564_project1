@@ -15,9 +15,9 @@ struct cache_system *cache_system_new(uint32_t line_size, uint32_t sets, uint32_
     cs->stats = stats;
 
     // TODO: calculate the index bits, offset bits and tag bits.
-    cs->index_bits = 0;
-    cs->offset_bits = 0;
-    cs->tag_bits = 0;
+    cs->index_bits = log2(cs->num_sets);
+    cs->offset_bits = log2(cs->line_size);
+    cs->tag_bits = 32-cs->index_bits-cs->offset_bits;
 
     cs->offset_mask = 0xffffffff >> (32 - cs->offset_bits);
     cs->set_index_mask = 0xffffffff >> cs->tag_bits;
@@ -120,6 +120,14 @@ struct cache_line *cache_system_find_cache_line(struct cache_system *cache_syste
                                                 uint32_t tag)
 {
     // TODO Return a pointer to the cache line within the given set that has
-    // the given tag. If no such element exists, then return NULL.
+    // the given tag. If no such element exists, then return NULL. DONE?????
+
+    int set_start = set_idx * cache_system->associativity;
+    for(int i = 0; i < cache_system->associativity; i++){
+        if(cache_system->cache_lines[set_start+i].tag == tag){
+            return &cache_system->cache_lines[set_start+i];
+        }
+    }
+    
     return NULL;
 }
